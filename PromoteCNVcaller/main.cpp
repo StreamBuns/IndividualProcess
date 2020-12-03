@@ -15,6 +15,8 @@
 #include <string.h>
 #include <vector>
 #include <regex>
+#include <fstream>
+
 using namespace std;
 #define MaxPath_64 18446744073709551615
 #define usage2 "Program: count the number of reads map to each window based on BWA mapped BAM files, need to install samtools software\nUsage: "+programName+" <refdb> <BAM>\n\t\t-w\t\twindow\tsize (bp)\n\t\tdefault = 800, keep the same with reference database"
@@ -26,14 +28,15 @@ char* itoa(int val, int base){
     return &buf[i+1];
 }
 void loadingBamFile(map<pair<string,int>,int>& mul,map<pair<string,int>,int>& uniq);
+void CompareOutput(map<pair<string,int>,int>& mul,map<pair<string,int>,int>& uniq);
 int main(int argc, char *const *argv) {
     // insert code here...
 
     string programName=argv[0];
     programName=programName.substr(programName.find_last_of('/')+1);
     cout<<programName<<endl;
-//    int ch;
-////    const char *optstring = ;
+    int ch;
+//    const char *optstring = ;
 //    while((ch = getopt(argc,argv, "abc:")) != -1){
 ////        opta
 //        if(optarg==NULL)cout<<"null"<<endl;
@@ -41,7 +44,6 @@ int main(int argc, char *const *argv) {
 //            case 'a':
 //                ch = getopt(argc,argv, "abc:");
 //                cout<<"opt is a\n"<<optopt;
-//
 //                break;
 //            case 'b':
 //                cout<<"opt is b\n";
@@ -74,6 +76,8 @@ int main(int argc, char *const *argv) {
         }
 //     cout<<argv[1]<<" file loading done!";
     cout<<__DATE__<<" "<<__TIME__<<"\n";
+    CompareOutput(mul,uniq);
+    cout<<"completed bam parsing!\n";
 //    cout<<out[0];
 //    int fds[2];
 //    if(pipe(fds)==-1){
@@ -102,6 +106,10 @@ int main(int argc, char *const *argv) {
 //    }
     return 0;
 }
+//-----------------------------------------------------------------------------
+
+
+
 void loadingBamFile(map<pair<string,int>,int> &mul,map<pair<string,int>,int> &uniq){
     FILE *fp;
 //    map<pair<string,int>,int> mul;
@@ -111,9 +119,10 @@ void loadingBamFile(map<pair<string,int>,int> &mul,map<pair<string,int>,int> &un
         exit(1);
     }
     char tempChar[500];
-    int i=0;
+//    int i=0;
     while (fgets(tempChar,sizeof(tempChar), fp)!=NULL){
         string tempString=tempChar;
+        tempChar[strlen(tempChar)-1]=0;
         char**read_inf=(char**)malloc(sizeof(char*)*20);
         char* token;
         const char s[2] = "\t";
@@ -160,4 +169,42 @@ void loadingBamFile(map<pair<string,int>,int> &mul,map<pair<string,int>,int> &un
         memset(tempChar,0,sizeof(tempChar));
     }
 
+}
+/*
+ *
+ */
+void CompareOutput(map<pair<string,int>,int>& mul,map<pair<string,int>,int>& uniq){
+    FILE *fp;
+    fstream outFile("/Users/zhaotong/SVsDemo/CNVcaller/coutRaw",ios::out);
+//    map<pair<string,int>,int> mul;
+//    map<pair<string,int>,int> uniq;
+    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/referenceDB.1000", "r")) == NULL) {
+        perror("Fail to popen\n");
+        exit(1);
+    }
+    char tempChar[500];
+    while (fgets(tempChar,sizeof(tempChar), fp)!=NULL){
+        string tempString=tempChar;
+        char**read_inf=(char**)malloc(sizeof(char*)*20);
+        char* token;
+        const char s[2] = "\t";
+        int i=0;
+        token = strtok(tempChar, s);
+        while( token != NULL ) {
+            read_inf[i++]=token;
+            printf( "%s\n", token );
+            token = strtok(NULL, s);
+        }
+        auto  mulIterator=mul.find(pair<string,int>(read_inf[0],atoi(read_inf[2])));
+        auto  uniqIterator=uniq.find(pair<string,int>(read_inf[0],atoi(read_inf[2])));
+        if(mul.end()!=mulIterator&&uniq.end()!=uniqIterator){
+            outFile<<read_inf[0]<<"\t"<<read_inf[1]<<"\t"<<read_inf[2]<<"\t"<<uniqIterator->second<<"\t"<<mulIterator->second<<"\t"<<read_inf[3]<<"\t"<<read_inf[4]<<"\n";
+        }else if(mul.end()==mulIterator&&uniq.end()!=uniqIterator){
+            outFile<<read_inf[0]<<"\t"<<read_inf[1]<<"\t"<<read_inf[2]<<"\t"<<uniqIterator->second<<"\t"<<0<<"\t"<<read_inf[3]<<"\t"<<read_inf[4]<<"\n";
+        }else if(mul.end()!=mulIterator&&uniq.end()==uniqIterator){
+            outFile<<read_inf[0]<<"\t"<<read_inf[1]<<"\t"<<read_inf[2]<<"\t"<<0<<"\t"<<mulIterator->second<<"\t"<<read_inf[3]<<"\t"<<read_inf[4]<<"\n";
+        }else{
+            outFile<<read_inf[0]<<"\t"<<read_inf[1]<<"\t"<<read_inf[2]<<"\t"<<0<<"\t"<<0<<"\t"<<read_inf[3]<<"\t"<<read_inf[4]<<"\n";
+        }
+    }
 }
