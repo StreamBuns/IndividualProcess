@@ -29,6 +29,7 @@ char* itoa(int val, int base){
 }
 void loadingBamFile(map<pair<string,int>,int>& mul,map<pair<string,int>,int>& uniq);
 void CompareOutput(map<pair<string,int>,int>& mul,map<pair<string,int>,int>& uniq);
+int i=0;
 int main(int argc, char *const *argv) {
     // insert code here...
 
@@ -36,116 +37,108 @@ int main(int argc, char *const *argv) {
     programName=programName.substr(programName.find_last_of('/')+1);
     cout<<programName<<endl;
     int ch;
-//    const char *optstring = ;
-//    while((ch = getopt(argc,argv, "abc:")) != -1){
-////        opta
-//        if(optarg==NULL)cout<<"null"<<endl;
-//        switch (ch) {
-//            case 'a':
-//                ch = getopt(argc,argv, "abc:");
-//                cout<<"opt is a\n"<<optopt;
-//                break;
-//            case 'b':
-//                cout<<"opt is b\n";
-//                break;
-//            case 'c':
-//                cout<<"opt is c\n";
-//                break;
-//            case '?':
-//                printf("error optopt: %c\n", optopt);
-//                printf("error opterr: %d\n", opterr);
-//                break;
-//        }
-//    }
+    while((ch = getopt(argc,argv, "abc:")) != -1){
+        if(optarg==NULL)cout<<"null"<<endl;
+        switch (ch) {
+            case 'a':
+                ch = getopt(argc,argv, "abc:");
+                cout<<"opt is w\n"<<optopt;
+                printf("%s\n",optarg);
+//                cout<<optarg;
+                break;
+            case 'b':
+                cout<<"opt is b\n";
+                break;
+            case 'c':
+                cout<<"opt is c\n";
+                break;
+            case '?':
+                printf("error optopt: %c\n", optopt);
+                printf("error opterr: %d\n", opterr);
+                break;
+        }
+    }
     int windowSize=1000;
     int stepSize=windowSize/2;
     map<pair<string,int>,int> mul;
     map<pair<string,int>,int> uniq;
+
     cout<<"stats read depth per window start!\n";
-    cout<<__DATE__<<" "<<__TIME__<<"\n";
+    std::cout << "The run time is: " <<(double)clock() / CLOCKS_PER_SEC << "s" << std::endl;
     string header;
     vector<char*> out;
     loadingBamFile(mul,uniq);
-    cout<<"uniq:"<<endl;
-        for(auto i:uniq){
-            cout<<i.first.first<<"->"<<i.first.second<<":"<<i.second<<endl;
-        }
-        cout<<"mul:"<<endl;
-        for(auto i:mul){
-            cout<<i.first.first<<"->"<<i.first.second<<":"<<i.second<<endl;
-        }
+//    cout<<"uniq:"<<endl;
+//        for(auto i:uniq){
+//            cout<<i.first.first<<"->"<<i.first.second<<":"<<i.second<<endl;
+//        }
+//        cout<<"mul:"<<endl;
+//        for(auto i:mul){
+//            cout<<i.first.first<<"->"<<i.first.second<<":"<<i.second<<endl;
+//        }
 //     cout<<argv[1]<<" file loading done!";
-    cout<<__DATE__<<" "<<__TIME__<<"\n";
+    std::cout << "The run time is: " <<(double)clock() / CLOCKS_PER_SEC << "s" << std::endl;
     CompareOutput(mul,uniq);
     cout<<"completed bam parsing!\n";
-//    cout<<out[0];
-//    int fds[2];
-//    if(pipe(fds)==-1){
-//        cerr<<"创建匿名管道失败\n";
-//    }
-//    pid_t pid=fork();
-//    if(pid==-1)cerr<<"创立子进程失败\n";
-//    if(pid==0){
-////        子进程
-//        close(fds[0]);
-//        write(fds[1], "abc", 3);
-//        close(fds[1]);
-//        exit(0);
-//    }else{
-////        夫进程
-//        close(fds[1]);
-//        char buf[100]={};
-//
-//        int r = (int)read(fds[0], buf, 100);
-//        if(r>0){
-//            cout<<"读取成功:"<<buf;
-//        }else{
-//            cerr<<"读取失败\n";
-//        }
-//        close(fds[0]);
-//    }
+//    cout<<__DATE__<<" "<<__TIME__<<"\n";
+    std::cout << "The run time is: " <<(double)clock() / CLOCKS_PER_SEC << "s" << std::endl;
     return 0;
 }
+
+
 //-----------------------------------------------------------------------------
 
 
 
 void loadingBamFile(map<pair<string,int>,int> &mul,map<pair<string,int>,int> &uniq){
     FILE *fp;
-//    map<pair<string,int>,int> mul;
-//    map<pair<string,int>,int> uniq;
-    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/loadingBamFile", "r")) == NULL) {
+    chdir("/Users/zhaotong/SVsDemo/CNVcaller/");
+//    system("samtools view -F 0x504 ERR340328.bam >>loadingBamFile2");
+//    fp=fopen("/Users/zhaotong/SVsDemo/CNVcaller/loadingBamFile2","r");
+//    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/loadingBamFile2", "r")) == NULL) {
+    if ((fp = popen("samtools view -F 0x504 ERR340328.bam", "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
-    char tempChar[500];
-//    int i=0;
+    char tempChar[1024*8];
+    char **read_inf= (char**)(malloc(20 * sizeof(char *)));
+    char *token;
+    const char s[2] = "\t";
+    string tempString;
+    int i=0;
+    int  count=0;
     while (fgets(tempChar,sizeof(tempChar), fp)!=NULL){
-        string tempString=tempChar;
+        tempString=tempChar;
         tempChar[strlen(tempChar)-1]=0;
-        char**read_inf=(char**)malloc(sizeof(char*)*20);
-        char* token;
-        const char s[2] = "\t";
-        int i=0;
         token = strtok(tempChar, s);
         while( token != NULL ) {
+//            stringArray[i++]=token;
             read_inf[i++]=token;
-            printf( "%s\n", token );
+//            printf( "%s\n", token );
             token = strtok(NULL, s);
         }
 
         read_inf[3]=itoa((int)(strlen(read_inf[9])/2)+atoi(read_inf[3]),10);
        int  windowSize=1000;
-
         int start= int(atoi(read_inf[3])/windowSize)*windowSize+1;
         int end=start+windowSize/2;
 //        if(regex_search(tempString,regex("XA:Z"))){
         if(tempString.find("XA:Z")==MaxPath_64){
+//        if(strStr(tempString,"XA:Z")==0){
+//           count = mul.count(pair<string,int>(read_inf[2],start));
            auto  iterator=mul.find(pair<string,int>(read_inf[2],start));
+//            if(count==0)
             if(iterator==mul.end())
                 mul.insert(pair<pair<string ,int>,int>(pair<string,int>(read_inf[2],start),1));
             else iterator->second++;
+//            else mul[pair<string,int>(read_inf[2],start)]++;
+//map[1]=1;
+
             iterator=mul.find(pair<string,int>(read_inf[2],end));
+//            count = mul.count(pair<string,int>(read_inf[2],end));
+//            if(0==count)
+//                mul.insert(pair<pair<string ,int>,int>(pair<string,int>(read_inf[2],end),1));
+//            else mul[pair<string,int>(read_inf[2],end)]++;
             if(iterator==mul.end())
                 mul.insert(pair<pair<string ,int>,int>(pair<string,int>(read_inf[2],end),1));
             else iterator->second++;
@@ -158,17 +151,21 @@ void loadingBamFile(map<pair<string,int>,int> &mul,map<pair<string,int>,int> &un
             if(iterator==uniq.end())
                 uniq.insert(pair<pair<string ,int>,int>(pair<string,int>(read_inf[2],end),1));
             else iterator->second++;
+//            count = uniq.count(pair<string,int>(read_inf[2],start));
+////           auto  iterator=mul.find(pair<string,int>(read_inf[2],start));
+//            if(count==0)
+//                uniq.insert(pair<pair<string ,int>,int>(pair<string,int>(read_inf[2],start),1));
+////            else iterator->second++;
+//            else mul[pair<string,int>(read_inf[2],start)]++;
+////            iterator=mul.find(pair<string,int>(read_inf[2],end));
+//            count = uniq.count(pair<string,int>(read_inf[2],end));
+//            if(0==count)
+//                uniq.insert(pair<pair<string ,int>,int>(pair<string,int>(read_inf[2],end),1));
+//            else uniq[pair<string,int>(read_inf[2],end)]++;
         }
-//        for(auto i:uniq){
-//            cout<<i.first.first<<"->"<<i.first.second<<":"<<i.second;
-//        }
-//        for(auto i:mul){
-//            cout<<i.first.first<<"->"<<i.first.second<<":"<<i.second;
-//        }
         i=0;
         memset(tempChar,0,sizeof(tempChar));
     }
-
 }
 /*
  *
@@ -176,35 +173,36 @@ void loadingBamFile(map<pair<string,int>,int> &mul,map<pair<string,int>,int> &un
 void CompareOutput(map<pair<string,int>,int>& mul,map<pair<string,int>,int>& uniq){
     FILE *fp;
     fstream outFile("/Users/zhaotong/SVsDemo/CNVcaller/coutRaw",ios::out);
-//    map<pair<string,int>,int> mul;
-//    map<pair<string,int>,int> uniq;
     if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/referenceDB.1000", "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
-    char tempChar[500];
+    char tempChar[1024*8];
+//    vector<char*> stringArray;
+//    char **read_inf= (char**)(malloc(20 * sizeof(char *)));
+        char**stringArray=(char**)malloc(sizeof(char*)*20);
+    char *token;
+    const char s[2] = "\t";
+    int i=0;
     while (fgets(tempChar,sizeof(tempChar), fp)!=NULL){
-        string tempString=tempChar;
-        char**read_inf=(char**)malloc(sizeof(char*)*20);
-        char* token;
-        const char s[2] = "\t";
-        int i=0;
+
         token = strtok(tempChar, s);
         while( token != NULL ) {
-            read_inf[i++]=token;
-            printf( "%s\n", token );
+            stringArray[i++]=token;
             token = strtok(NULL, s);
         }
-        auto  mulIterator=mul.find(pair<string,int>(read_inf[0],atoi(read_inf[2])));
-        auto  uniqIterator=uniq.find(pair<string,int>(read_inf[0],atoi(read_inf[2])));
+        auto  mulIterator=mul.find(pair<string,int>(stringArray[0],atoi(stringArray[2])));
+        auto  uniqIterator=uniq.find(pair<string,int>(stringArray[0],atoi(stringArray[2])));
         if(mul.end()!=mulIterator&&uniq.end()!=uniqIterator){
-            outFile<<read_inf[0]<<"\t"<<read_inf[1]<<"\t"<<read_inf[2]<<"\t"<<uniqIterator->second<<"\t"<<mulIterator->second<<"\t"<<read_inf[3]<<"\t"<<read_inf[4]<<"\n";
+            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<uniqIterator->second<<"\t"<<mulIterator->second<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
         }else if(mul.end()==mulIterator&&uniq.end()!=uniqIterator){
-            outFile<<read_inf[0]<<"\t"<<read_inf[1]<<"\t"<<read_inf[2]<<"\t"<<uniqIterator->second<<"\t"<<0<<"\t"<<read_inf[3]<<"\t"<<read_inf[4]<<"\n";
+            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<uniqIterator->second<<"\t"<<0<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
         }else if(mul.end()!=mulIterator&&uniq.end()==uniqIterator){
-            outFile<<read_inf[0]<<"\t"<<read_inf[1]<<"\t"<<read_inf[2]<<"\t"<<0<<"\t"<<mulIterator->second<<"\t"<<read_inf[3]<<"\t"<<read_inf[4]<<"\n";
+            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<0<<"\t"<<mulIterator->second<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
         }else{
-            outFile<<read_inf[0]<<"\t"<<read_inf[1]<<"\t"<<read_inf[2]<<"\t"<<0<<"\t"<<0<<"\t"<<read_inf[3]<<"\t"<<read_inf[4]<<"\n";
+            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<0<<"\t"<<0<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
         }
+        i=0;
     }
+    outFile.close();
 }

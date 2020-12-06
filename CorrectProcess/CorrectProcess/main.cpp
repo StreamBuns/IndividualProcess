@@ -26,12 +26,12 @@ int main(int argc, char *const *argv) {
     cout<<programName<<endl;
     map<pair<string,int>,vector<char*> *> link;
     loadingDupfile(link);
-    for(auto i:link){
-        for(auto j:*i.second){
-            cout<<j<<"\t";
-        }
-        cout<<endl;
-    }
+//    for(auto i:link){
+//        for(auto j:*i.second){
+//            cout<<j<<"\t";
+//        }
+//        cout<<endl;
+//    }
     cout<<"duplicated window record file loading finished!\n";
     std::cout << "Hello, World!" << std::endl;
     return 0;
@@ -49,7 +49,7 @@ int main(int argc, char *const *argv) {
 //    return (vector<char*>*)temp;
 //}
 void loadingDupfile(map<pair<string,int>,vector<char*> *>& link) {
-//    生命文件指针
+//    声明文件指针
     FILE *fp;
 //打开文件
     if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/dupfile2", "r")) == NULL) {
@@ -87,6 +87,11 @@ void loadingDupfile(map<pair<string,int>,vector<char*> *>& link) {
 ////            sprintf(tempChar, "%s",i);
 //
 //        }
+        vector<int > intArray={1,2,3,4};
+        vector<int > intArray2;
+        intArray2.assign(intArray.begin()+1, intArray.end());
+
+//        int intArray3[10];
         link.insert(pair<pair<string ,int>,vector<char*>*>(pair<string,int>(stringArray[0],atoi(token)),new vector<char*>(stringArray.begin()+1, stringArray.end())));
 //        link.insert(pair<pair<string,int>(stringArray[0],atoi(token)),vector<char*>>())
         stringArray.clear();
