@@ -45,28 +45,28 @@ int main(int argc, char *const *argv) {
     string programName=argv[0];
     programName=programName.substr(programName.find_last_of('/')+1);
     cout<<programName<<endl;
-    int ch;
-    while((ch = getopt(argc,argv, "abc:")) != -1){
-        if(optarg==NULL)cout<<"null"<<endl;
-        switch (ch) {
-            case 'a':
-                ch = getopt(argc,argv, "abc:");
-                cout<<"opt is w\n"<<optopt;
-                printf("%s\n",optarg);
-//                cout<<optarg;
-                break;
-            case 'b':
-                cout<<"opt is b\n";
-                break;
-            case 'c':
-                cout<<"opt is c\n";
-                break;
-            case '?':
-                printf("error optopt: %c\n", optopt);
-                printf("error opterr: %d\n", opterr);
-                break;
-        }
-    }
+//    int ch;
+//    while((ch = getopt(argc,argv, "abc:")) != -1){
+//        if(optarg==NULL)cout<<"null"<<endl;
+//        switch (ch) {
+//            case 'a':
+//                ch = getopt(argc,argv, "abc:");
+//                cout<<"opt is w\n"<<optopt;
+//                printf("%s\n",optarg);
+////                cout<<optarg;
+//                break;
+//            case 'b':
+//                cout<<"opt is b\n";
+//                break;
+//            case 'c':
+//                cout<<"opt is c\n";
+//                break;
+//            case '?':
+//                printf("error optopt: %c\n", optopt);
+//                printf("error opterr: %d\n", opterr);
+//                break;
+//        }
+//    }
     int windowSize=1000;
     int stepSize=windowSize/2;
     unordered_map<pair<string, int>, int,hash_pair> mul2;
