@@ -1,7 +1,10 @@
 //
 //  main.cpp
-//  NormalizeProcess
-//
+//  程序名称：NormalizeProcess
+//  程序功能：对之前的拷贝数的统计出的窗口片断进行修正。
+//  程序使用方法：先用gcc进行编译，然后再结合参数进行编译
+//  程序调用的参数：-h absoluteFilePath -w windowsSize -s sex -p p -l l
+//              其中-h -w -s必填
 //  Created by 赵桐 on 2021/1/24.
 //
 
@@ -18,13 +21,18 @@
 #include <unordered_map>
 #include <string>
 using namespace std;
-char* itoa(int val, int base){
-    static char buf[32] = {0};
-    int i = 30;
-    for(; val && i ; --i, val /= base)
-        buf[i] = "0123456789abcdef"[val % base];
-    return &buf[i+1];
-}
+
+
+/*
+ *功能定义输入的初始变量，主要是窗口大小windowsSize，可重复的上线l与下限p，还有染色体号s
+ *其实后面也会进行变量的赋值，这里只是给予一个初始化的值
+ */
+int windowSize=800;
+double p=0.05,l=0.05;
+string absoluteFile;
+string s="X";
+int repeatMax=windowSize*0.3;
+char* itoa(int val, int base);
 template <class T1,class T2> struct hash<pair<T1,T2>>{
     size_t operator()(const pair<T1, T2>&p)const{
         auto hash1 = hash<T1>{}(p.first);
@@ -32,63 +40,116 @@ template <class T1,class T2> struct hash<pair<T1,T2>>{
         return hash1 ^ hash2;
     }
 };
-void printGenomeCopy(unordered_map<pair<string, int>, int> genomeCopy){
-    for(auto i:genomeCopy){
-        cout<<i.second<<endl;
-    }
-}
-float topPercent(float p,vector<float> globalArray){
-    int intCutoff=(int)(p*(globalArray.size()-1));
-    return globalArray.at(intCutoff);
-}
+void printGenomeCopy(unordered_map<pair<string, int>, int> genomeCopy);
+float topPercent(float p,vector<float> globalArray);
+//void headFileLoading(vector<int>& XArray,vector<int>& globalArray,unordered_map<pair<string, int>, int>& genomeCopy,map<int,vector<int*>>&GCRegionAverage){
+//    FILE *fp;
+////打开文件
+//    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/ERR340328", "r")) == NULL) {
+////        if ((fp = popen("cat "+absoluteFile, "r")) == NULL) {
+//        perror("Fail to popen\n");
+//        exit(1);
+//    }
+//
+//    //    用于存储临时每行的数据
+//    //   29    2    56    440    504    1
+//    vector<char *> stringArray;
+////    用于临时存储读取的段
+//    char tempChar[500];
+//    char *token;
+//    const char spliteStr[2] = "\t";
+//
+//    while (fgets(tempChar, sizeof(tempChar), fp) != NULL) {
+////    去掉最后面的回车
+//        tempChar[strlen(tempChar) - 1] = 0;
+//        token = strtok(tempChar, spliteStr);
+//        while (token != NULL) {
+//            stringArray.push_back(token);
+//            token = strtok(NULL, spliteStr);
+//        }
+//
+//        genomeCopy.insert(pair<pair<string, int>, int>(pair<string, int>(stringArray[0],stoi(stringArray[1])),stoi(stringArray[stringArray.size()-1])));
+//
+//        if(1 == s.compare(stringArray[0])){
+//            if(stoi(stringArray[4])<=repeatMax&&stoi(stringArray[stringArray.size()-1])==1){
+//                XArray.push_back(stoi(stringArray[2]));
+//            }
+//        }else{
+//            if(stoi(stringArray[4])<=repeatMax&&stoi(stringArray[stringArray.size()-1])==1){
+//                globalArray.push_back(stoi(stringArray[2]));
+//
+//                auto iter=GCRegionAverage.find(stoi(stringArray[3]));
+//                if(iter!= GCRegionAverage.end()){
+//                    iter->second.push_back(stoi(stringArray[2]));
+//                }else{
+//                    GCRegionAverage.insert(pair<int,vector<int> *>(stoi(stringArray[3]),new vector<int>{stoi(stringArray[2])}));
+//                }
+//
+//            }
+//        }
+//
+//
+//        stringArray.clear();
+//        memset(tempChar, 0, sizeof(char) * 500);
+//
+//}
+//
+//}
 int main(int argc, char *const *argv) {
-    int windowSize=800;
-    double p=0.05,l=0.05;
-    string s="29";
+    
     unordered_map<pair<string, int>, int> genomeCopy;
     map<int,vector<int>*> GCRegionAverage;
     vector<int> XArray;
     vector<int> globalArray;
     vector<float> globalArray2;
-    //此处加入获取命令行参数
+    
+/*
+ *功能获取程序名称
+ */
+    
     string programName=argv[0];
     programName=programName.substr(programName.find_last_of('/')+1);
     cout<<programName<<endl;
-    int ch;
-    while((ch = getopt(argc,argv, "abc:")) != -1){
-        if(optarg==NULL)cout<<"null"<<endl;
-        switch (ch) {
-            case 'a':
-                ch = getopt(argc,argv, "abc:");
-                cout<<"opt is w\n"<<optopt;
-                printf("%s\n",optarg);
-//                cout<<optarg;
-                break;
-            case 'b':
-                cout<<"opt is b\n";
-                break;
-            case 'c':
-                cout<<"opt is c\n";
-                break;
-            case '?':
-                printf("error optopt: %c\n", optopt);
-                printf("error opterr: %d\n", opterr);
-                break;
-        }
-    }
+/*
+ *******************************************************************
+ */
     
-    int repeatMax=windowSize*0.3;
+/*
+ *此区域功能提供获取命令行参数，一般是-h ../RD_absolute/$header，-w 800 -s X -p 0.05 -l 0.05
+ */
+    
+    string optString;
+    int ch;
+    opterr = 0; //选项错误时不让报错
+    while ((ch = getopt(argc, argv, "h:w:s:pl")) != -1) {
+        switch (ch) {
+            case 'h':absoluteFile=string(optarg);break;
+            case 'w':windowSize=stoi(string(optarg));break;
+            case 's': s = string(optarg); break;
+            case 'p': p = stod(string(optarg)) ; break;
+            case 'l': l = stod(string(optarg)); break;
+        }
+        cout << optString << endl;
+    }
+    repeatMax=windowSize*0.3;
+
+    programName=absoluteFile.substr(absoluteFile.find_last_of('/')+1);
+    cout<<"parsing "<<programName<<" starting!\n";
+    
+/*
+ ***********************************************************************
+ */
+    
     
     FILE *fp;
-
+    cout<<absoluteFile<<endl;
 //打开文件
-    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/test1-3", "r")) == NULL) {
+    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/ERR340328", "r")) == NULL) {
+//        if ((fp = popen("cat "+absoluteFile, "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
-//    cout<<argv[0]<<endl;
-    cout<<"parsing starting!\n";
-    
+
     //    用于存储临时每行的数据
     //   29    2    56    440    504    1
     vector<char *> stringArray;
@@ -129,11 +190,14 @@ int main(int argc, char *const *argv) {
     
         stringArray.clear();
         memset(tempChar, 0, sizeof(char) * 500);
-        
-        
-        
 }
-    printGenomeCopy(genomeCopy);
+//    for(auto i:GCRegionAverage){
+//        cout<<i.first<<'\t';
+//        for(auto j:*i.second){
+//            cout<<j<<endl;
+//        }
+//    }
+//    printGenomeCopy(genomeCopy);
     cout<<"$ARGV[0] file loading finished.\n";
     
     sort(globalArray.begin(), globalArray.end());
@@ -180,18 +244,18 @@ int main(int argc, char *const *argv) {
     XArray.clear();
     int sum=0;
     int sumWindows=0;
-    int temp;
+    float temp;
     map<int,float> regionAverageSd;
     for(auto i:GCRegionAverage){
         sort(i.second->begin(), i.second->end());
-        for(int j=(int)(i.second->size()*l);j<(int)(1-p)*i.second->size();j++){
+        for(int j=(int)(i.second->size()*l);j<=(int)((1-p)*i.second->size());j++){
             sumWindows++;
             sum+=i.second->at(j);
         }
-//        sumWindows=sumWindows>0?sum/sumWindows:0;
+        
         temp=sumWindows>0?sum/sumWindows:0;
         regionAverageSd.insert(pair<int, float>(i.first,temp));
-        cout<<i.first<<"\t"<<temp<<"\t"<<sumWindows<<"\t"<<i.second->size()<<"\n";
+        cout<<i.first<<"\t"<<temp<<"\t"<<sumWindows<<"\t"<<i.second->size()-1<<"\n";
         
         sumWindows=0;
         sum=0;
@@ -210,13 +274,15 @@ int main(int argc, char *const *argv) {
         }
         int standardAverage = iter->second;
         
-        for(auto i:regionAverageSd){
-            i.second=i.second>0?standardAverage/i.second:0;
+        for(auto &i:regionAverageSd){
+            i.second=i.second>0?(float)((float)standardAverage/i.second):0;
         }
         
+/*
+ ***************************************************************************************
+ */
         
-        
-        if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/test1-3", "r")) == NULL) {
+        if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/ERR340328", "r")) == NULL) {
             perror("Fail to popen\n");
             exit(1);
         }
@@ -236,6 +302,19 @@ int main(int argc, char *const *argv) {
             iter=regionAverageSd.find(stoi(stringArray[3]));
             if(iter==regionAverageSd.end()){
                 regionAverageSd.insert(pair<int, float>(stoi(stringArray[3]),0));
+                
+                if(s.compare(stringArray[0])==1){
+                    cleanRecord.insert(pair<pair<string, int>, float>(pair<string, int>(stringArray[0],stoi(stringArray[1])),0));
+                }else{
+                    globalArray2.push_back(0);
+                    cleanRecord.insert(pair<pair<string, int>, float>(pair<string, int>(stringArray[0],stoi(stringArray[1])),0));
+                }
+                
+                stringArray.clear();
+                memset(tempChar, 0, sizeof(char) * 500);
+                
+                continue;
+
             }
             if(s.compare(stringArray[0])==1){
                 cleanRecord.insert(pair<pair<string, int>, float>(pair<string, int>(stringArray[0],stoi(stringArray[1])),sexCorrectFold*stoi(stringArray[2])*iter->second));
@@ -250,8 +329,12 @@ int main(int argc, char *const *argv) {
             
         }
         
+
+    
         cout<<"correct read count according to GC content done!\n";
-        
+/*
+ ****************************************************************
+ */
         sort(globalArray2.begin(), globalArray2.end());
         
         float correctMedian50 =globalArray2[(int)((0.5)*globalArray2.size())];
@@ -262,7 +345,6 @@ int main(int argc, char *const *argv) {
     int globalMin=topPercent(l, globalArray2);
     
     globalArray2.clear();
-//    map<pair<string, int>,float> cleanRecord;
     for(auto i:cleanRecord){
         if(i.second>globalMax||i.second<globalMin){
             continue;
@@ -275,17 +357,17 @@ int main(int argc, char *const *argv) {
         sumForGlobalArray+=i;
     }
     
-    float globalAverage = sum/globalArray2.size();
+    float globalAverage = sumForGlobalArray/globalArray2.size();
     
     sumForGlobalArray=0;
     for(auto i:globalArray2){
         sumForGlobalArray+=(i-globalAverage)*(i-globalAverage);
     }
     
-    float globalSd=sqrt(sum/(globalArray2.size()-1));
+    float globalSd=sqrt(sumForGlobalArray/(globalArray2.size()-1));
     cout<<"global average: "<<globalAverage<<"\tglobal SD: "<<globalSd<<"\n";
     cout<<"the "<<1-p<<" th percentile absolute reads count:"<<globalMax<<"\n";
-    cout<<"the "<<l<<" th percentile absolute reads count:"<<globalMax<<"\n";
+    cout<<"the "<<l<<" th percentile absolute reads count:"<<globalMin<<"\n";
     
     float copyNumber=0;
     for(auto i:cleanRecord){
@@ -295,4 +377,19 @@ int main(int argc, char *const *argv) {
     cout<<"succeed！\n";
     return 0;
 }
-
+char* itoa(int val, int base){
+    static char buf[32] = {0};
+    int i = 30;
+    for(; val && i ; --i, val /= base)
+        buf[i] = "0123456789abcdef"[val % base];
+    return &buf[i+1];
+}
+void printGenomeCopy(unordered_map<pair<string, int>, int> genomeCopy){
+    for(auto i:genomeCopy){
+        cout<<i.second<<endl;
+    }
+}
+float topPercent(float p,vector<float> globalArray){
+    int intCutoff=(int)(p*(globalArray.size()-1));
+    return globalArray.at(intCutoff);
+}

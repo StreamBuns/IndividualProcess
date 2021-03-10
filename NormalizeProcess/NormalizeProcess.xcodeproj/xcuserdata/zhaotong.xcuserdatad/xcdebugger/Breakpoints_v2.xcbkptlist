@@ -7,15 +7,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "00D39E81-50E7-4EBE-9671-BF7A0FF896D4"
+            uuid = "1D97409C-5D97-4EB3-8361-BBA0C03DDD13"
             shouldBeEnabled = "No"
-            ignoreCount = "0"
+            ignoreCount = "3"
             continueAfterRunningActions = "No"
             filePath = "NormalizeProcess/main.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "109"
-            endingLineNumber = "109"
+            startingLineNumber = "256"
+            endingLineNumber = "256"
             landmarkName = "main(argc, argv)"
             landmarkType = "9">
          </BreakpointContent>
@@ -23,15 +23,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "8F4917C0-3315-4E15-820B-69211799766C"
+            uuid = "6E1F786D-9FAE-46AE-A9E5-B37B89ACCB06"
             shouldBeEnabled = "No"
-            ignoreCount = "0"
+            ignoreCount = "2"
             continueAfterRunningActions = "No"
             filePath = "NormalizeProcess/main.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "136"
-            endingLineNumber = "136"
+            startingLineNumber = "250"
+            endingLineNumber = "250"
             landmarkName = "main(argc, argv)"
             landmarkType = "9">
          </BreakpointContent>
@@ -39,31 +39,63 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "FF771107-B9C4-4C80-90EC-5089760513A7"
+            uuid = "BFDC33EF-4D85-4F7B-A8F0-3DF050ADF077"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "NormalizeProcess/main.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "295"
-            endingLineNumber = "295"
+            startingLineNumber = "249"
+            endingLineNumber = "249"
             landmarkName = "main(argc, argv)"
             landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "BFDC33EF-4D85-4F7B-A8F0-3DF050ADF077 - 4263c76c7b3c7566"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "NormalizeProcess"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/zhaotong/SVsDemo/PromoteCNVcaller/NormalizeProcess/NormalizeProcess/main.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "241"
+                  endingLineNumber = "241"
+                  offsetFromSymbolStart = "7069">
+               </Location>
+               <Location
+                  uuid = "BFDC33EF-4D85-4F7B-A8F0-3DF050ADF077 - 4263c76c7b3c7566"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "NormalizeProcess"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/zhaotong/SVsDemo/PromoteCNVcaller/NormalizeProcess/NormalizeProcess/main.cpp"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "241"
+                  endingLineNumber = "241"
+                  offsetFromSymbolStart = "7177">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "4E478CA6-8007-4435-B250-CC01C90131F8"
+            uuid = "C21E591C-F945-4FF0-B23C-255814B5A915"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "NormalizeProcess/main.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "293"
-            endingLineNumber = "293"
+            startingLineNumber = "344"
+            endingLineNumber = "344"
             landmarkName = "main(argc, argv)"
             landmarkType = "9">
          </BreakpointContent>
