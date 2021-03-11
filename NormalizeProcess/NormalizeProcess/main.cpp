@@ -30,9 +30,17 @@ using namespace std;
 int windowSize=800;
 double p=0.05,l=0.05;
 string absoluteFile;
+string head;
 string s="X";
 int repeatMax=windowSize*0.3;
+/*
+ *函数名称：itoa
+ *函数功能：把int转换为char*
+ */
 char* itoa(int val, int base);
+/*
+ *模版功能：提供一个hashcode用于unorder_map
+ */
 template <class T1,class T2> struct hash<pair<T1,T2>>{
     size_t operator()(const pair<T1, T2>&p)const{
         auto hash1 = hash<T1>{}(p.first);
@@ -40,69 +48,28 @@ template <class T1,class T2> struct hash<pair<T1,T2>>{
         return hash1 ^ hash2;
     }
 };
+/*
+ *函数名称：printGenomeCopy
+ *函数功能：打印GenomeCopy,map里面的变量属于辅助函数
+ */
 void printGenomeCopy(unordered_map<pair<string, int>, int> genomeCopy);
+/*
+ *函数名称：topPercent
+ *函数功能：取出数组特定百分比的数
+ */
 float topPercent(float p,vector<float> globalArray);
-//void headFileLoading(vector<int>& XArray,vector<int>& globalArray,unordered_map<pair<string, int>, int>& genomeCopy,map<int,vector<int*>>&GCRegionAverage){
-//    FILE *fp;
-////打开文件
-//    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/ERR340328", "r")) == NULL) {
-////        if ((fp = popen("cat "+absoluteFile, "r")) == NULL) {
-//        perror("Fail to popen\n");
-//        exit(1);
-//    }
-//
-//    //    用于存储临时每行的数据
-//    //   29    2    56    440    504    1
-//    vector<char *> stringArray;
-////    用于临时存储读取的段
-//    char tempChar[500];
-//    char *token;
-//    const char spliteStr[2] = "\t";
-//
-//    while (fgets(tempChar, sizeof(tempChar), fp) != NULL) {
-////    去掉最后面的回车
-//        tempChar[strlen(tempChar) - 1] = 0;
-//        token = strtok(tempChar, spliteStr);
-//        while (token != NULL) {
-//            stringArray.push_back(token);
-//            token = strtok(NULL, spliteStr);
-//        }
-//
-//        genomeCopy.insert(pair<pair<string, int>, int>(pair<string, int>(stringArray[0],stoi(stringArray[1])),stoi(stringArray[stringArray.size()-1])));
-//
-//        if(1 == s.compare(stringArray[0])){
-//            if(stoi(stringArray[4])<=repeatMax&&stoi(stringArray[stringArray.size()-1])==1){
-//                XArray.push_back(stoi(stringArray[2]));
-//            }
-//        }else{
-//            if(stoi(stringArray[4])<=repeatMax&&stoi(stringArray[stringArray.size()-1])==1){
-//                globalArray.push_back(stoi(stringArray[2]));
-//
-//                auto iter=GCRegionAverage.find(stoi(stringArray[3]));
-//                if(iter!= GCRegionAverage.end()){
-//                    iter->second.push_back(stoi(stringArray[2]));
-//                }else{
-//                    GCRegionAverage.insert(pair<int,vector<int> *>(stoi(stringArray[3]),new vector<int>{stoi(stringArray[2])}));
-//                }
-//
-//            }
-//        }
-//
-//
-//        stringArray.clear();
-//        memset(tempChar, 0, sizeof(char) * 500);
-//
-//}
-//
-//}
+
 int main(int argc, char *const *argv) {
-    
+/*
+ *定义变量，genomeCopy存储片段，GCreginAverage是存储特定位置的片段信息，Xarray存储性染色体的片段信息
+ *globalArray存储常染色体片段信息，globalArray2存储矫正后的片段信息
+ *
+ */
     unordered_map<pair<string, int>, int> genomeCopy;
     map<int,vector<int>*> GCRegionAverage;
     vector<int> XArray;
     vector<int> globalArray;
     vector<float> globalArray2;
-    
 /*
  *功能获取程序名称
  */
@@ -118,7 +85,6 @@ int main(int argc, char *const *argv) {
  *此区域功能提供获取命令行参数，一般是-h ../RD_absolute/$header，-w 800 -s X -p 0.05 -l 0.05
  */
     
-    string optString;
     int ch;
     opterr = 0; //选项错误时不让报错
     while ((ch = getopt(argc, argv, "h:w:s:pl")) != -1) {
@@ -129,7 +95,6 @@ int main(int argc, char *const *argv) {
             case 'p': p = stod(string(optarg)) ; break;
             case 'l': l = stod(string(optarg)); break;
         }
-        cout << optString << endl;
     }
     repeatMax=windowSize*0.3;
 
@@ -140,19 +105,26 @@ int main(int argc, char *const *argv) {
  ***********************************************************************
  */
     
+/*
+ *加载片段信息
+ */
     
     FILE *fp;
     cout<<absoluteFile<<endl;
 //打开文件
-    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/ERR340328", "r")) == NULL) {
+    absoluteFile="/Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/ERR340328";
+    absoluteFile="cat "+absoluteFile;
+    
+    if ((fp = popen(absoluteFile.data(), "r")) == NULL) {
 //        if ((fp = popen("cat "+absoluteFile, "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
 
-    //    用于存储临时每行的数据
-    //   29    2    56    440    504    1
+//    用于存储临时每行的数据
+//   29    2    56    440    504    1
     vector<char *> stringArray;
+    
 //    用于临时存储读取的段
     char tempChar[500];
     char *token;
@@ -191,15 +163,15 @@ int main(int argc, char *const *argv) {
         stringArray.clear();
         memset(tempChar, 0, sizeof(char) * 500);
 }
-//    for(auto i:GCRegionAverage){
-//        cout<<i.first<<'\t';
-//        for(auto j:*i.second){
-//            cout<<j<<endl;
-//        }
-//    }
-//    printGenomeCopy(genomeCopy);
-    cout<<"$ARGV[0] file loading finished.\n";
+    cout<<"RD_absolute file loading finished.\n";
     
+/*
+***********************************************************************
+*/
+
+/*
+ *找常染色体不同百分比下的中位数
+ */
     sort(globalArray.begin(), globalArray.end());
     
     int median90=globalArray[(int)((0.9)*globalArray.size())];
@@ -217,6 +189,10 @@ int main(int argc, char *const *argv) {
     cout<<"tail 10 percent window is lower than "<<median10<<endl;
     cout<<"tail 50 percent window is lower than "<<median50<<endl;
     cout<<"tail 90 percent window is lower than "<<median90<<endl;
+    
+/*
+ *找到性染色体的不同百分比的中位数，然后判定性染色体性染色体与常染色体的关系？
+ */
     
     int Xmedian50=0;
     if(XArray.size()>=1){
@@ -239,7 +215,14 @@ int main(int argc, char *const *argv) {
         sexCorrectFold=1;
         cout<<"sex chromosome "<<s<<" show UNKOWN relationship with autosome?\n";
     }
+/*
+ *************************************************************************
+ */
+
     
+/*
+ *计算每个GC含量区域的平均值
+ */
     globalArray.clear();
     XArray.clear();
     int sum=0;
@@ -262,10 +245,16 @@ int main(int argc, char *const *argv) {
     }
     
         GCRegionAverage.clear();
-        
         cout<<"calculate average value for each GC content region done!\n";
         
-        
+/*
+ ***********************************************************************************
+ */
+    
+/*
+ *计算矫正的百分比
+ */
+    
         temp=(int)windowSize*0.4;
         auto iter= regionAverageSd.find(temp);
         while (iter==regionAverageSd.end()) {
@@ -281,8 +270,12 @@ int main(int argc, char *const *argv) {
 /*
  ***************************************************************************************
  */
+    
+/*
+ *根据矫正比例矫正GC的读取片段
+ */
         
-        if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/ERR340328", "r")) == NULL) {
+        if ((fp = popen(absoluteFile.data(), "r")) == NULL) {
             perror("Fail to popen\n");
             exit(1);
         }
@@ -330,10 +323,13 @@ int main(int argc, char *const *argv) {
         }
         
 
-    
         cout<<"correct read count according to GC content done!\n";
 /*
  ****************************************************************
+ */
+    
+/*
+ *计算全部的平均值和SD
  */
         sort(globalArray2.begin(), globalArray2.end());
         
@@ -341,16 +337,16 @@ int main(int argc, char *const *argv) {
         
         cout<<"global median50 "<<correctMedian50<<"\n";
         
-    int globalMax=topPercent(1-p, globalArray2);
-    int globalMin=topPercent(l, globalArray2);
+        int globalMax=topPercent(1-p, globalArray2);
+        int globalMin=topPercent(l, globalArray2);
     
-    globalArray2.clear();
-    for(auto i:cleanRecord){
-        if(i.second>globalMax||i.second<globalMin){
-            continue;
+        globalArray2.clear();
+        for(auto i:cleanRecord){
+            if(i.second>globalMax||i.second<globalMin){
+                continue;
+            }
+            globalArray2.push_back(i.second);
         }
-        globalArray2.push_back(i.second);
-    }
     
    float sumForGlobalArray=0;
     for(auto i:globalArray2){
@@ -369,11 +365,27 @@ int main(int argc, char *const *argv) {
     cout<<"the "<<1-p<<" th percentile absolute reads count:"<<globalMax<<"\n";
     cout<<"the "<<l<<" th percentile absolute reads count:"<<globalMin<<"\n";
     
+    
+/*
+ ******************************************************************************
+ */
+
+    
+/*
+ * 输出矫正的数据
+ */
+//    absoluteFile=_mean_$correct_median50\_SD_$global_sd\_sex_$sex_correct_fold
+    programName="ERR303";
+    programName = programName+"/"+to_string(correctMedian50)+"/_SD_"+to_string(globalSd)+"/"+s+to_string(sexCorrectFold);
+    programName ="/Users/zhaotong/SVsDemo/CNVcaller/"+programName;
+    fstream outFile(programName.data(),ios::out);
+    
     float copyNumber=0;
     for(auto i:cleanRecord){
         copyNumber=i.second/correctMedian50;
-        cout<<i.first.first<<"\t"<<i.first.second<<"\t"<<copyNumber<<"\t"<<i.second<<"\t"<<endl;
+        outFile<<i.first.first<<"\t"<<i.first.second<<"\t"<<copyNumber<<"\t"<<i.second<<"\t"<<endl;
     }
+    outFile.close();
     cout<<"succeed！\n";
     return 0;
 }
