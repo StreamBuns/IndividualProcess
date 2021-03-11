@@ -1,6 +1,9 @@
 //
 //  main.cpp
-//  CorrectProcess
+//  程序名称：CorrectProcess
+//  程序功能：对之前的窗口文件进行矫正，得到绝对的窗口片段读数
+//  程序使用方法：先用gcc进行编译，然后再结合参数进行编译
+//  程序调用的参数：-r rawFile -d dupFile -c saveFile
 //
 //  Created by 赵桐 on 2020/12/1.
 //
@@ -9,10 +12,14 @@
 #include <map>
 #include <vector>
 #include <unordered_map>
-
+#include <fstream>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <zconf.h>
 using namespace std;
-#define usage2
-
+/*
+ *模版功能：提供一个hashcode用于unorder_map
+ */
 template <class T1,class T2> struct hash<pair<T1,T2>>{
     size_t operator()(const pair<T1, T2>&p)const{
         auto hash1 = hash<T1>{}(p.first);
@@ -20,9 +27,25 @@ template <class T1,class T2> struct hash<pair<T1,T2>>{
         return hash1 ^ hash2;
     }
 };
-void correct(unordered_map<pair<string , int>,int> &raw,unordered_map<pair<string, int>, string *> &link);
+/*
+ *函数名称：loadingRawFile
+ *函数功能：加载1-1生成的raw文件，选取有效的数据存入raw数据结构中
+ */
 void loadingRawFile(unordered_map<pair<string , int>,int> &raw);
+/*
+ *函数名称：loadingDupfile
+ *函数功能：加载dupFile重复窗口记录文件，需拿去有效的数据存入link数据结构中
+ */
 void loadingDupfile(unordered_map<pair<string, int>, string *> &link);
+/*
+ *函数名称：correct
+ *函数功能：将加载的重复窗口记录与原始窗口数据进行矫正。
+ */
+void correct(unordered_map<pair<string , int>,int> &raw,unordered_map<pair<string, int>, string *> &link);
+/*
+ *函数名称：itoa
+ *函数功能：把int转换为char*
+ */
 char *itoa(int val, int base) {
     static char buf[32] = {0};
     int i = 30;
@@ -30,48 +53,43 @@ char *itoa(int val, int base) {
         buf[i] = "0123456789abcdef"[val % base];
     return &buf[i + 1];
 }
-
-vector<string> split(const string& str, const string& delim);
-
-
-/*
- *函数名：void printRaw(unordered_map<pair<string , int>,int> raw)
- *输入：unordered_map<pair<string , int>,int> raw
- *功能：打印raw里面的内容。
- *备注：raw是上一步处理得到的初步的readdeepth，是个键值对，key是染色体序号和窗口位置，值是两个深度相加之和。
- */
-void printRaw(unordered_map<pair<string , int>,int> raw){
-    for(auto i:raw){
-        cout << i.second<<endl;
-    }
-}
-void printLink(unordered_map<pair<string, int>, string *>link){
-    for (auto i:link) {
-        int size = stoi(*i.second);
-        for (int m = 0; m < size; m++) {
-            cout << i.second[m]<<endl;
-        }
-    }
-}
+//-----------------------------------------------------------------------------
+string rawFile,dupfile,savaFile;
 int main(int argc, char *const *argv) {
     string programName = argv[0];
     programName = programName.substr(programName.find_last_of('/') + 1);
     cout << programName << endl;
+/*
+* 此区域功能提供获取命令行参数，一般是-h ../RD_absolute/$header，-w 800 -s X -p 0.05 -l 0.05
+*/
+        
+        int ch;
+        opterr = 0; //选项错误时不让报错
+        while ((ch = getopt(argc, argv, "r:d:c:")) != -1) {
+            switch (ch) {
+                case 'r':rawFile=string(optarg);break;
+                case 'd':dupfile=string(optarg);break;
+                case 'c':savaFile = string(optarg); break;
+            }
+        }
+    
     unordered_map<pair<string, int>,int> raw;
     unordered_map<pair<string, int>,string *> link;
     loadingRawFile(raw);
-//    printRaw(raw);
     loadingDupfile(link);
-//    printLink(link);
     correct(raw, link);
     cout << "absolute reads counts correction finished!\n" ;
     return 0;
 }
+//-----------------------------------------------------------------------------
+  
 void loadingRawFile(unordered_map<pair<string , int>,int> &raw){
     FILE *fp;
-
+    rawFile="cat "+rawFile;
 //打开文件
-    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_raw/ERR340328_raw3", "r")) == NULL) {
+    if ((fp = popen(rawFile.data(), "r")) ==
+//    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_raw/ERR340328_raw3", "r")) ==
+        NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
@@ -93,8 +111,6 @@ void loadingRawFile(unordered_map<pair<string , int>,int> &raw){
         }
         
         raw.insert(pair<pair<string, int>, int>(pair<string, int>(stringArray[0], atoi(stringArray[2])), atoi(stringArray[3])+atoi(stringArray[4])));
-
-    
         stringArray.clear();
         memset(tempChar, 0, sizeof(char) * 500);
         
@@ -103,17 +119,17 @@ void loadingRawFile(unordered_map<pair<string , int>,int> &raw){
 }
     cout<<"raw reads count file loading finished!\n";
 }
-/*
- *加载重复窗口文件。dupfile
- */
-
+//-----------------------------------------------------------------------------
+  
 void loadingDupfile(unordered_map<pair<string, int>, string *> &link){
 //    声明文件指针
     FILE *fp;
 
+    dupfile="cat "+dupfile;
+//    打开文件
+    if ((fp = popen(dupfile.data(), "r")) == NULL) {
 
-//打开文件
-    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/dupfile", "r")) == NULL) {
+//    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/dupfile", "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
@@ -154,16 +170,18 @@ void loadingDupfile(unordered_map<pair<string, int>, string *> &link){
     }
     cout << "duplicated window record file loading finished!\n";
 }
+//-----------------------------------------------------------------------------
+  
 void correct(unordered_map<pair<string , int>,int> &raw,unordered_map<pair<string, int>, string *> &link){
     FILE *fp;
-
-//打开文件
+    fstream outFile(savaFile.data(),ios::out);
+//     打开文件
     if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_raw/ERR340328_raw3", "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
-    //    用于存储临时每行的数据
-    //    29    1    1    50    0    482    129
+//        用于存储临时每行的数据
+//        29    1    1    50    0    482    129
     vector<char *> stringArray;
 //    用于临时存储读取的段
      
@@ -174,7 +192,7 @@ void correct(unordered_map<pair<string , int>,int> &raw,unordered_map<pair<strin
     string chr;
     string position;
     int pos;
-    int absoluteCp=0,genome_copy = 0,correctNumber=0;
+    int absoluteCp=0,genome_copy = 0,correctNumber=0,size=0;
     while (fgets(tempChar, sizeof(tempChar), fp) != NULL) {
 //    去掉最后面的回车
         tempChar[strlen(tempChar) - 1] = 0;
@@ -184,13 +202,12 @@ void correct(unordered_map<pair<string , int>,int> &raw,unordered_map<pair<strin
             token = strtok(NULL, s);
         }
         auto iterator=link.find(pair<string,int>(stringArray[0],stoi(stringArray[2])));
+//               如果存在这个窗口则把这个基因的拷贝片段的读段相加
         if (iterator!=link.end()){
             correctNumber++;
-            
-            int size = stoi(*iterator->second);
-            //因为那个size是加上了第一个所以大小大1.
+            size = stoi(*iterator->second);
+//              因为那个size是加上了第一个所以大小大1.
             for (int i=1; i<size; i++) {
-                cout << iterator->second[i]<<endl;
                 
                 chr=iterator->second[i];
                 
@@ -204,10 +221,10 @@ void correct(unordered_map<pair<string , int>,int> &raw,unordered_map<pair<strin
                     absoluteCp+=iteratorForRaw->second;
                 }
             }
-            cout<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<absoluteCp<<"\t"<<stringArray[5]<<"\t"<<stringArray[6]<<"\t"<<genome_copy<<"\n";
-            
-            
-        }else             cout<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stoi(stringArray[3])+stoi(stringArray[4])<<"\t"<<stringArray[5]<<"\t"<<stringArray[6]<<"\t"<<1<<"\n";;
+            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<absoluteCp<<"\t"<<stringArray[5]<<"\t"<<stringArray[6]<<"\t"<<genome_copy<<"\n";
+        }
+//        没有记录的窗口那么就直接把多重索引与单个的索引相加。
+        else outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stoi(stringArray[3])+stoi(stringArray[4])<<"\t"<<stringArray[5]<<"\t"<<stringArray[6]<<"\t"<<1<<"\n";;
         
         
         
@@ -216,22 +233,5 @@ void correct(unordered_map<pair<string , int>,int> &raw,unordered_map<pair<strin
     }
     cout<< "corrected window number: "<<correctNumber<<endl;
 }
-vector<string> split(const string& str, const string& delim) {
-    vector<string> res;
-    if("" == str) return res;
-    //先将要切割的字符串从string类型转换为char*类型
-    char * strs = new char[str.length() + 1] ; //不要忘了
-    strcpy(strs, str.c_str());
- 
-    char * d = new char[delim.length() + 1];
-    strcpy(d, delim.c_str());
- 
-    char *p = strtok(strs, d);
-    while(p) {
-        string s = p; //分割得到的字符串转换为string类型
-        res.push_back(s); //存入结果数组
-        p = strtok(NULL, d);
-    }
- 
-    return res;
-}
+//-----------------------------------------------------------------------------
+  

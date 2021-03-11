@@ -77,9 +77,7 @@ int main(int argc, char *const *argv) {
     string programName=argv[0];
     programName=programName.substr(programName.find_last_of('/')+1);
     cout<<programName<<endl;
-/*
- *******************************************************************
- */
+//-----------------------------------------------------------------------------
     
 /*
  *此区域功能提供获取命令行参数，一般是-h ../RD_absolute/$header，-w 800 -s X -p 0.05 -l 0.05
@@ -101,9 +99,7 @@ int main(int argc, char *const *argv) {
     programName=absoluteFile.substr(absoluteFile.find_last_of('/')+1);
     cout<<"parsing "<<programName<<" starting!\n";
     
-/*
- ***********************************************************************
- */
+//-----------------------------------------------------------------------------
     
 /*
  *加载片段信息
@@ -165,9 +161,7 @@ int main(int argc, char *const *argv) {
 }
     cout<<"RD_absolute file loading finished.\n";
     
-/*
-***********************************************************************
-*/
+//-----------------------------------------------------------------------------
 
 /*
  *找常染色体不同百分比下的中位数
@@ -215,9 +209,7 @@ int main(int argc, char *const *argv) {
         sexCorrectFold=1;
         cout<<"sex chromosome "<<s<<" show UNKOWN relationship with autosome?\n";
     }
-/*
- *************************************************************************
- */
+//-----------------------------------------------------------------------------
 
     
 /*
@@ -247,9 +239,7 @@ int main(int argc, char *const *argv) {
         GCRegionAverage.clear();
         cout<<"calculate average value for each GC content region done!\n";
         
-/*
- ***********************************************************************************
- */
+//-----------------------------------------------------------------------------
     
 /*
  *计算矫正的百分比
@@ -267,9 +257,7 @@ int main(int argc, char *const *argv) {
             i.second=i.second>0?(float)((float)standardAverage/i.second):0;
         }
         
-/*
- ***************************************************************************************
- */
+//-----------------------------------------------------------------------------
     
 /*
  *根据矫正比例矫正GC的读取片段
@@ -324,9 +312,7 @@ int main(int argc, char *const *argv) {
         
 
         cout<<"correct read count according to GC content done!\n";
-/*
- ****************************************************************
- */
+//-----------------------------------------------------------------------------
     
 /*
  *计算全部的平均值和SD
@@ -366,9 +352,7 @@ int main(int argc, char *const *argv) {
     cout<<"the "<<l<<" th percentile absolute reads count:"<<globalMin<<"\n";
     
     
-/*
- ******************************************************************************
- */
+//-----------------------------------------------------------------------------
 
     
 /*
@@ -389,6 +373,7 @@ int main(int argc, char *const *argv) {
     cout<<"succeed！\n";
     return 0;
 }
+//-----------------------------------------------------------------------------
 char* itoa(int val, int base){
     static char buf[32] = {0};
     int i = 30;
@@ -396,12 +381,15 @@ char* itoa(int val, int base){
         buf[i] = "0123456789abcdef"[val % base];
     return &buf[i+1];
 }
+//-----------------------------------------------------------------------------
 void printGenomeCopy(unordered_map<pair<string, int>, int> genomeCopy){
     for(auto i:genomeCopy){
         cout<<i.second<<endl;
     }
 }
+//-----------------------------------------------------------------------------
 float topPercent(float p,vector<float> globalArray){
     int intCutoff=(int)(p*(globalArray.size()-1));
     return globalArray.at(intCutoff);
 }
+//-----------------------------------------------------------------------------
