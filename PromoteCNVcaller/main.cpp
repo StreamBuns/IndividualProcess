@@ -36,6 +36,7 @@ void CompareOutput(unordered_map<pair<string, int>, int>& mul,unordered_map<pair
 int windowSize=1000;
 string bamFile;
 string refFile;
+string head;
 int stepSize=windowSize/2;
 int main(int argc, char *const *argv) {
     // insert code here...
@@ -62,7 +63,7 @@ int main(int argc, char *const *argv) {
             case 'w': windowSize = stoi(string(optarg)); break;
         }
     }
-
+    head=bamFile.substr(0,bamFile.find("."));
     stepSize=windowSize/2;
     
     cout<<"stats read depth per window start!\n";
@@ -96,11 +97,9 @@ char* itoa(int val, int base){
 
 void loadingBamFile(unordered_map<pair<string, int>, int> &mul,unordered_map<pair<string, int>, int> &uniq){
     FILE *fp;
-    chdir("/Users/zhaotong/SVsDemo/CNVcaller/");
-    bamFile="ERR340328.bam";
+
     bamFile="samtools view -F 0x504 "+bamFile;
-//    if ((fp = popen(bamFile.data(), "r")) == NULL) {
-    if ((fp = popen("cat testBam", "r")) == NULL) {
+    if ((fp = popen(bamFile.data(), "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
@@ -153,8 +152,8 @@ void loadingBamFile(unordered_map<pair<string, int>, int> &mul,unordered_map<pai
  */
 void CompareOutput(unordered_map<pair<string, int>, int>& mul,unordered_map<pair<string,int>,int> &uniq){
     FILE *fp;
-
-    fstream outFile("/Users/zhaotong/SVsDemo/CNVcaller/coutRaw7",ios::out);
+    head="../RD_raw/"+head+"_raw";
+    fstream outFile(head.data(),ios::out);
     refFile = "cat "+refFile;
 //    if ((fp = popen(refFile.date(), "r")) ==
     if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/referenceDB.1000", "r")) == NULL) {

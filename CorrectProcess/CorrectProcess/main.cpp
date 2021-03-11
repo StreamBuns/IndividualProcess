@@ -3,7 +3,7 @@
 //  程序名称：CorrectProcess
 //  程序功能：对之前的窗口文件进行矫正，得到绝对的窗口片段读数
 //  程序使用方法：先用gcc进行编译，然后再结合参数进行编译
-//  程序调用的参数：-r rawFile -d dupFile -c saveFile
+//  程序调用的参数：-r rawFile -d dupFile -h head
 //
 //  Created by 赵桐 on 2020/12/1.
 //
@@ -54,7 +54,7 @@ char *itoa(int val, int base) {
     return &buf[i + 1];
 }
 //-----------------------------------------------------------------------------
-string rawFile,dupfile,savaFile;
+string rawFile,dupfile,head;
 int main(int argc, char *const *argv) {
     string programName = argv[0];
     programName = programName.substr(programName.find_last_of('/') + 1);
@@ -65,11 +65,11 @@ int main(int argc, char *const *argv) {
         
         int ch;
         opterr = 0; //选项错误时不让报错
-        while ((ch = getopt(argc, argv, "r:d:c:")) != -1) {
+        while ((ch = getopt(argc, argv, "r:d:h:")) != -1) {
             switch (ch) {
                 case 'r':rawFile=string(optarg);break;
                 case 'd':dupfile=string(optarg);break;
-                case 'c':savaFile = string(optarg); break;
+                case 'h':head = string(optarg); break;
             }
         }
     
@@ -174,9 +174,11 @@ void loadingDupfile(unordered_map<pair<string, int>, string *> &link){
   
 void correct(unordered_map<pair<string , int>,int> &raw,unordered_map<pair<string, int>, string *> &link){
     FILE *fp;
-    fstream outFile(savaFile.data(),ios::out);
+    head="../RD_absolute/"+head;
+    fstream outFile(head.data(),ios::out);
 //     打开文件
-    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_raw/ERR340328_raw3", "r")) == NULL) {
+    rawFile="cat "+rawFile;
+    if ((fp = popen(rawFile.data(), "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }

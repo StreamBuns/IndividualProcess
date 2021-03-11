@@ -108,11 +108,9 @@ int main(int argc, char *const *argv) {
     FILE *fp;
     cout<<absoluteFile<<endl;
 //打开文件
-    absoluteFile="/Users/zhaotong/SVsDemo/CNVcaller/RD_absolute/ERR340328";
     absoluteFile="cat "+absoluteFile;
     
     if ((fp = popen(absoluteFile.data(), "r")) == NULL) {
-//        if ((fp = popen("cat "+absoluteFile, "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
@@ -358,10 +356,9 @@ int main(int argc, char *const *argv) {
 /*
  * 输出矫正的数据
  */
-//    absoluteFile=_mean_$correct_median50\_SD_$global_sd\_sex_$sex_correct_fold
-    programName="ERR303";
-    programName = programName+"/"+to_string(correctMedian50)+"/_SD_"+to_string(globalSd)+"/"+s+to_string(sexCorrectFold);
-    programName ="/Users/zhaotong/SVsDemo/CNVcaller/"+programName;
+    programName = programName+"_mean_"+to_string(correctMedian50)+"_SD_"+to_string(globalSd)+"_sex_"+to_string(sexCorrectFold);
+    programName ="../RD_normalized/"+programName;
+    cout<<programName<<endl;
     fstream outFile(programName.data(),ios::out);
     
     float copyNumber=0;
