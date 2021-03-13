@@ -358,7 +358,6 @@ int main(int argc, char *const *argv) {
  */
     programName = programName+"_mean_"+to_string(correctMedian50)+"_SD_"+to_string(globalSd)+"_sex_"+to_string(sexCorrectFold);
     programName ="../RD_normalized/"+programName;
-    cout<<programName<<endl;
     fstream outFile(programName.data(),ios::out);
     
     float copyNumber=0;

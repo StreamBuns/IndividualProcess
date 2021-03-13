@@ -56,16 +56,18 @@ int main(int argc, char *const *argv) {
  */
     int ch;
     opterr = 0; //选项错误时不让报错
-    while ((ch = getopt(argc, argv, "r:b:w:")) != -1) {
+    while ((ch = getopt(argc, argv, "r:b:w:h:")) != -1) {
         switch (ch) {
             case 'r':refFile=string(optarg);break;
             case 'b':bamFile=string(optarg);break;
             case 'w': windowSize = stoi(string(optarg)); break;
+            case 'h':head=string(optarg);break;
         }
     }
-    head=bamFile.substr(0,bamFile.find("."));
+    cout<<head<<endl;
+//    head=bamFile.substr(0,bamFile.find("."));
     stepSize=windowSize/2;
-    
+
     cout<<"stats read depth per window start!\n";
     std::cout << "The run time is: " <<(double)clock() / CLOCKS_PER_SEC << "s" << std::endl;
     loadingBamFile(mul,uniq);
@@ -155,40 +157,39 @@ void CompareOutput(unordered_map<pair<string, int>, int>& mul,unordered_map<pair
     head="../RD_raw/"+head+"_raw";
     fstream outFile(head.data(),ios::out);
     refFile = "cat "+refFile;
-//    if ((fp = popen(refFile.date(), "r")) ==
-    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/referenceDB.1000", "r")) == NULL) {
+    if ((fp = popen(refFile.data(), "r")) ==NULL){
         perror("Fail to popen\n");
-        exit(1);
-    }
-    vector<char *> stringArray;
+            exit(1);
+}
+vector<char *> stringArray;
 //    用于临时存储读取的段
-    char tempChar[500];
-    char *token;
-    const char spliteStr[2] = "\t";
-    while (fgets(tempChar, sizeof(tempChar), fp) != NULL) {
+char tempChar[500];
+char *token;
+const char spliteStr[2] = "\t";
+while (fgets(tempChar, sizeof(tempChar), fp) != NULL) {
 //    去掉最后面的回车
-        tempChar[strlen(tempChar) - 1] = 0;
-        token = strtok(tempChar, spliteStr);
-        while (token != NULL) {
-            stringArray.push_back(token);
-            token = strtok(NULL, spliteStr);
-        }
+tempChar[strlen(tempChar) - 1] = 0;
+token = strtok(tempChar, spliteStr);
+while (token != NULL) {
+stringArray.push_back(token);
+token = strtok(NULL, spliteStr);
+}
 
-        auto  mulIterator=mul.find(pair<string,int>(stringArray[0],stoi(stringArray[2])));
-        auto  uniqIterator=uniq.find(pair<string,int>(stringArray[0],stoi(stringArray[2])));
-        if(mul.end()!=mulIterator&&uniq.end()!=uniqIterator){
-            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<mulIterator->second<<"\t"<<uniqIterator->second<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
-        }else if(mul.end()==mulIterator&&uniq.end()!=uniqIterator){
-            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<0<<"\t"<<uniqIterator->second<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
-        }else if(mul.end()!=mulIterator&&uniq.end()==uniqIterator){
-            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<mulIterator->second<<"\t"<<0<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
-        }else{
-            outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<0<<"\t"<<0<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
-        }
+auto  mulIterator=mul.find(pair<string,int>(stringArray[0],stoi(stringArray[2])));
+auto  uniqIterator=uniq.find(pair<string,int>(stringArray[0],stoi(stringArray[2])));
+if(mul.end()!=mulIterator&&uniq.end()!=uniqIterator){
+outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<mulIterator->second<<"\t"<<uniqIterator->second<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
+}else if(mul.end()==mulIterator&&uniq.end()!=uniqIterator){
+outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<0<<"\t"<<uniqIterator->second<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
+}else if(mul.end()!=mulIterator&&uniq.end()==uniqIterator){
+outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<mulIterator->second<<"\t"<<0<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
+}else{
+outFile<<stringArray[0]<<"\t"<<stringArray[1]<<"\t"<<stringArray[2]<<"\t"<<0<<"\t"<<0<<"\t"<<stringArray[3]<<"\t"<<stringArray[4]<<"\n";
+}
 
-        stringArray.clear();
-        memset(tempChar, 0, sizeof(char) * 500);
-    }
-    outFile.close();
+stringArray.clear();
+memset(tempChar, 0, sizeof(char) * 500);
+}
+outFile.close();
 }
 //-------------------------------------------------------------------------------

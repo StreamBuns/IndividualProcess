@@ -88,7 +88,6 @@ void loadingRawFile(unordered_map<pair<string , int>,int> &raw){
     rawFile="cat "+rawFile;
 //打开文件
     if ((fp = popen(rawFile.data(), "r")) ==
-//    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/RD_raw/ERR340328_raw3", "r")) ==
         NULL) {
         perror("Fail to popen\n");
         exit(1);
@@ -129,7 +128,6 @@ void loadingDupfile(unordered_map<pair<string, int>, string *> &link){
 //    打开文件
     if ((fp = popen(dupfile.data(), "r")) == NULL) {
 
-//    if ((fp = popen("cat /Users/zhaotong/SVsDemo/CNVcaller/dupfile", "r")) == NULL) {
         perror("Fail to popen\n");
         exit(1);
     }
