@@ -2,13 +2,13 @@
 
 使用方法：
 编译命令
-g++ -o 1-1CNVprogress 1-1CNVprogress.cpp -std=c++11
-g++ -o 1-2CNVcorrect 1-2CNVcorrect.cpp -stl=c++11
-g++ -o 1-3CNVnormalize  1-3CNVnormalize.cpp -std=c++11
-运行命令
-./1-1CNVprogress -r referenceDB.1000 -b  ERR340328.bam -w 1000
-参数说明 -r referenceDB那个窗口记录文件 -b输入的bam文件 -w 窗口大小
-./1-2CNVcorrect -r  ../RD_raw/ERR340328_raw -d dupfile -h ERR340328
-参数说明 -r 第一部产生的raw文件 -d 重复窗口记录文件 -h bam的head
-./1-3CNVnomolization -h ../RD_absolute/ERR340328 -w 1000 -s X
--h 上一部产生的表头文件 -w 窗口大小 -s X 性染色体组成XX或者X或者XY？
+./src/make.sh
+
+使用方法
+运行命令实例
+./IndividualProcess -b ../resources/ERR340328.bam -h ERR340328 -d ../resources/dupfile -s X -r ../resources/referenceDB.1000
+
+-b bam文件 -h bam的标头 -d dupfile重复窗口记录文件 -s性染色体组成 -r窗口对照文件
+
+需要注意
+资源文件尽量新建一个resources文件放在下面，方便归类管理
